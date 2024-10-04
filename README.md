@@ -1,60 +1,41 @@
 ## Overview
 
-Our goal is to *Dockerize* the collector, redis server, and flask server of the weather app. We will:
+The goal of this project is to demonstrate how to deploy a a simple application with three components:
 
-* Create containers for the collector and server
-* Develop commands to launch and destroy the redis, collector, and server containers
-* Create scripts to launch and destroy the entire system
+1. A Python program using [`requests`](https://docs.python-requests.org/en/master/) to collect data.
+2. The [redis](https://redis.io/) database to store data
+3. A [Flask](https://flask.palletsprojects.com/en/2.0.x/) server launched via [gunicorn](https://gunicorn.org/) to server up the data.
+
+The data used in this example is the current temperature in Bethlehem using data from the [WeatherAPI](https://www.weatherapi.com/).
+
+The "application" modeled is intentionally minimal: Every 15 minutes, the collector obtains the current count and stores it in the redis database.  The Flask server has a single end point that allows a user to fetch this data.
+
+
 
 ![architecture](architecture.png)
 
-## Build a Container for the Collector
 
-* Create a `Dockerfile`
-* Build the Docker container and tag it with the name `weather_collector`
 
-## Build a Container for the Server
+## WeatherAPI Setup
 
-* Create a `Dockerfile` (same basic pattern as the collector)
-* Build the Docker container and tag it with the name `weather_server`
+To use this application you must [signup for a free WeatherAPI key](https://www.weatherapi.com/signup.aspx).
 
-## Launch the System
+After you have signed up and confirmed your email, go to the [WeatherAPI Account page](https://www.weatherapi.com/my/) and copy your API key (near the top of the page).  To verify your API key, replace `<API_KEY>` in the following command:
 
-* Create a network named `weather`
-* Launch a Redis container 
-  * Run the container in the `weatherweather` network
-  * Name the container `redis`
-* Launch an instance of the `weather_collector`
-  * Run the container in the `weather` network
-  * Name the container `weather_collector`
-  * Create an environment variable named `REDIS_HOST` with the value `redis`
-  * Create an environment variable named `REDIS_PORT` with the value 6379
-* Launch an instance of the `weather_server`
-  * Launch the container in the `weather` network
-  * Name the container `weather_server`
-  * Create an environment variable named `REDIS_HOST` with the value `redis`
-  * Create an environment variable named `REDIS_PORT`
-  * Expose port 8000
+```
+curl "http://api.weatherapi.com/v1/current.json?q=18018&key=<API_KEY>"
+```
 
-## Create a Launch Script
+If it succeeds, the output should be something like:
 
-* In a file named `up`:
-  * Launch the Redis container
-  * Launch the collector container
-  * Launch the server container
-* In a file named `down`:
-  * Stop (and remove) the server
-  * Stop (and remove) the collector
-  * Stop (and remove) the redis container
-* Add executable permissions to both files
-  * e.g. `chmod +x up`
-* Run `./up` to start the system
-* Run `/.down` to stop the system
+```
+{"location":{"name":"Bethlehem","region":"Pennsylvania","country":"USA","lat":40.62,"lon":-75.41,"tz_id":"America/New_York","localtime_epoch":1710293264,"localtime":"2024-03-12 21:27"},"current":{"last_updated_epoch":1710292500,"last_updated":"2024-03-12 21:15","temp_c":12.2,"temp_f":54.0,"is_day":0,"condition":{"text":"Clear","icon":"//cdn.weatherapi.com/weather/64x64/night/113.png","code":1000},"wind_mph":5.6,"wind_kph":9.0,"wind_degree":240,"wind_dir":"WSW","pressure_mb":1010.0,"pressure_in":29.83,"precip_mm":0.0,"precip_in":0.0,"humidity":45,"cloud":0,"feelslike_c":11.7,"feelslike_f":53.1,"vis_km":16.0,"vis_miles":9.0,"uv":1.0,"gust_mph":9.4,"gust_kph":15.1}}
+```
 
 
 ## AWS Deploy
 
-To deploy on AWS, we have to do following:
+We will deploy this system on an EC2 instance.  To deploy on AWS, we have to do following:
 
 1. Install `git` and clone the repository
 
