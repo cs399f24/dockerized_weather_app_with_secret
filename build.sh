@@ -11,14 +11,6 @@ if [ ! -f server/server.env ]; then
   exit 1
 fi
 
-if ! docker image inspect collector > /dev/null 2>&1; then
-  docker build -t collector collector
-fi
-
-if ! docker image inspect server > /dev/null 2>&1; then
-  docker build -t server server
-fi
-
-if ! docker network inspect weather > /dev/null 2>&1; then
-  docker network create weather
-fi
+docker build -t collector collector
+docker build -t server server
+docker network create weather
