@@ -3,14 +3,21 @@ import redis
 import time
 import dotenv
 import os
+import boto3
+from botocore.exceptions import ClientError
+import json
 
+
+secret_name = "weather_api_key"
+region_name = "us-east-1"
+session = boto3.session.Session()
+client = session.client(service_name='secretsmanager', region_name=region_name)
+get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+api_key = json.loads(get_secret_value_response['SecretString'])['APIkey']
 
 dotenv.load_dotenv()
-
 host = os.getenv('REDIS_HOST')
 port = os.getenv('REDIS_PORT')
-api_key = os.getenv('API_KEY')
-
 r = redis.Redis(host=host, port=port)
 
 while True:
