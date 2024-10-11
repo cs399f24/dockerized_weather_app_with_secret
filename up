@@ -1,4 +1,5 @@
 # launch redis first because the other containers depend it
 docker run -d --network weather --name redisdb -p 6379:6379 -v $(pwd)/data:/data redis redis-server --save 10 1
+sleep 1
 docker run -d --network weather --name collector -v $(pwd)/collector/collector.env:/app/.env  collector
 docker run -d --network weather --name server -p 80:80 -v $(pwd)/server/server.env:/app/.env server
