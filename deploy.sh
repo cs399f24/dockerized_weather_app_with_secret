@@ -1,5 +1,5 @@
 #!/bin/bash
-install -y git
+yum install -y git
 git clone https://github.com/cs399s24/dockerized_weather_app_with_secret.git 
 yum install -y docker
 systemctl enable docker
