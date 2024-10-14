@@ -1,5 +1,0 @@
-docker rm -f server
-docker rm -f collector
-# Make sure the data is saved to disk before stopping redis
-docker exec -it redisdb redis-cli save
-docker rm -f redisdb
